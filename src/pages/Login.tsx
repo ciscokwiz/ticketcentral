@@ -1,13 +1,44 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
-  // TODO: Implement Google authentication
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Handle Google login
   const handleGoogleLogin = () => {
-    console.log("Google login clicked");
+    // Redirect to backend auth route using Vite's environment variable syntax
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   };
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/user`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          // User is already logged in, redirect to dashboard
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to check authentication status",
+          variant: "destructive"
+        });
+      }
+    };
+
+    checkAuth();
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-neutral-100">

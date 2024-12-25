@@ -1,4 +1,5 @@
 import { Calendar, Mail, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -18,18 +19,18 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Events</h4>
             <ul className="space-y-3 text-sm text-neutral-600">
-              <li><a href="#" className="hover:text-primary transition-colors">Browse Events</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Create Event</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
+              <li><Link to="/events" className="hover:text-primary transition-colors">Browse Events</Link></li>
+              <li><Link to="/events/create" className="hover:text-primary transition-colors">Create Event</Link></li>
+              <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-3 text-sm text-neutral-600">
-              <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">FAQs</a></li>
+              <li><Link to="/help" className="hover:text-primary transition-colors">Help Center</Link></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              <li><Link to="/faq" className="hover:text-primary transition-colors">FAQs</Link></li>
             </ul>
           </div>
 
@@ -54,18 +55,18 @@ const Footer = () => {
 
         <div className="border-t border-neutral-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-neutral-600">
-            © 2024 tixcentral. All rights reserved.
+            © 2024 TixCentral. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-neutral-600 hover:text-primary transition-colors">
+            <Link to="/terms" className="text-neutral-600 hover:text-primary transition-colors">
               Terms
-            </a>
-            <a href="#" className="text-neutral-600 hover:text-primary transition-colors">
+            </Link>
+            <Link to="/privacy" className="text-neutral-600 hover:text-primary transition-colors">
               Privacy
-            </a>
-            <a href="#" className="text-neutral-600 hover:text-primary transition-colors">
+            </Link>
+            <Link to="/security" className="text-neutral-600 hover:text-primary transition-colors">
               Security
-            </a>
+            </Link>
           </div>
         </div>
       </div>
