@@ -30,35 +30,81 @@ const Directory = () => {
   ];
   
   // Sample events data - in a real app, this would come from your backend
-  const events = [
-    {
-      id: 1,
-      title: "Summer Music Festival",
-      category: "Music",
-      date: "2024-07-15",
-      price: 99.99,
-      location: "Central Park",
-      image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80"
-    },
-    {
-      id: 2,
-      title: "Tech Conference 2024",
-      category: "Technology",
-      date: "2024-08-20",
-      price: 299.99,
-      location: "Convention Center",
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80"
-    },
-    {
-      id: 3,
-      title: "Stand-up Comedy Night",
-      category: "Comedy",
-      date: "2024-06-10",
-      price: 49.99,
-      location: "Comedy Club",
-      image: "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&q=80"
-    },
-  ];
+
+const events = [
+  {
+    id: 1,
+    title: "Summer Music Festival",
+    category: "Music",
+    date: "2024-07-15",
+    price: 99.99,
+    location: "Central Park",
+    image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 2,
+    title: "Tech Conference 2024",
+    category: "Technology",
+    date: "2024-08-20",
+    price: 299.99,
+    location: "Convention Center",
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 3,
+    title: "Stand-up Comedy Night",
+    category: "Comedy",
+    date: "2024-06-10",
+    price: 49.99,
+    location: "Comedy Club",
+    image: "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 4,
+    title: "Broadway Musical Show",
+    category: "Theater",
+    date: "2024-09-05",
+    price: 149.99,
+    location: "Theater District",
+    image: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 5,
+    title: "Food & Wine Festival",
+    category: "Food & Drink",
+    date: "2024-06-25",
+    price: 79.99,
+    location: "Waterfront Park",
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 6,
+    title: "Art Gallery Opening",
+    category: "Arts",
+    date: "2024-07-01",
+    price: 25.00,
+    location: "Modern Art Museum",
+    image: "https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 7,
+    title: "Business Leadership Summit",
+    category: "Business",
+    date: "2024-08-15",
+    price: 399.99,
+    location: "Grand Hotel Conference Center",
+    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80"
+  },
+  {
+    id: 8,
+    title: "Championship Soccer Match",
+    category: "Sports",
+    date: "2024-07-30",
+    price: 89.99,
+    location: "National Stadium",
+    image: "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?auto=format&fit=crop&q=80"
+  }
+];
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,7 +120,7 @@ const Directory = () => {
       
       <main className="container-padding pt-32 pb-16">
         <div className="max-w-6xl mx-auto">
-          <h1 className="heading-lg mb-8">Event Repository</h1>
+          <h1 className="heading-lg mb-8">Event Directory</h1>
           
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <div className="w-full md:w-64 space-y-4">

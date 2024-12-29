@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,9 +15,11 @@ const Login = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await signInWithEmail(email, password);
       navigate("/dashboard");
@@ -27,6 +29,8 @@ const Login = () => {
         title: "Error signing in",
         description: "Invalid email or password. Please try again.",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +51,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
-      <div className="container-padding py-12">
+      <div className="container-padding py-12 mt-16">
         <Card className="max-w-md mx-auto">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold text-center">Sign In to TixCentral</CardTitle>
@@ -80,9 +84,15 @@ const Login = () => {
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full">
-                Sign in with Email
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign in with Email"}
               </Button>
+              <p className="text-center text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-blue-600 hover:underline">
+                  Sign Up
+                </Link>
+              </p>
             </form>
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
