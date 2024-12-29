@@ -4,6 +4,7 @@ import {
   signInWithPopup, 
   signOut, 
   onAuthStateChanged,
+  signInWithEmailAndPassword,
   User
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -11,6 +12,7 @@ import { auth } from '@/lib/firebase';
 interface AuthContextType {
   currentUser: User | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -35,6 +37,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error('Error signing in with email:', error);
+      throw error;
     }
   };
 
@@ -43,6 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error;
     }
   };
 
@@ -58,6 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     currentUser,
     signInWithGoogle,
+    signInWithEmail,
     logout,
     loading
   };

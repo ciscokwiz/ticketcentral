@@ -1,24 +1,46 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Mail, Lock } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
-  const { signInWithGoogle, currentUser } = useAuth();
+  const { signInWithGoogle, signInWithEmail, currentUser } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await signInWithEmail(email, password);
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing in",
+        description: "Invalid email or password. Please try again.",
+      });
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error signing in:", error);
     }
   };
 
   if (currentUser) {
-    navigate("/");
+    navigate("/dashboard");
     return null;
   }
 
@@ -26,12 +48,54 @@ const Login = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       <div className="container-padding py-12">
-        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow">
-          <h1 className="text-2xl font-semibold mb-6 text-center">Sign In to TixCentral</h1>
-          <div className="space-y-4">
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold text-center">Sign In to TixCentral</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleEmailSignIn} className="space-y-4 mb-6">
+              <div className="space-y-2">
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+              <Button type="submit" className="w-full">
+                Sign in with Email
+              </Button>
+            </form>
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
             <Button
               onClick={handleGoogleSignIn}
               className="w-full flex items-center justify-center gap-2"
+              variant="outline"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -53,8 +117,8 @@ const Login = () => {
               </svg>
               Sign in with Google
             </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
       <Footer />
     </div>
