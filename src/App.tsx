@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Events from "./pages/Events";
 import Directory from "./pages/Directory";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/events" element={<Events />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
