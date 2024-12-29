@@ -1,60 +1,37 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const { signInWithGoogle, currentUser } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  // Handle Google login
-  const handleGoogleLogin = () => {
-    // Redirect to backend auth route using Vite's environment variable syntax
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
   };
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/user`, {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          // User is already logged in, redirect to dashboard
-          navigate('/dashboard');
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to check authentication status",
-          variant: "destructive"
-        });
-      }
-    };
-
-    checkAuth();
-  }, [navigate, toast]);
+  if (currentUser) {
+    navigate("/");
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
-      
-      <main className="container mx-auto px-4 pt-32 pb-16">
-        <div className="max-w-md mx-auto">
-          <Card className="p-8">
-            <h1 className="text-2xl font-bold text-center mb-6">Welcome to TixCentral</h1>
-            <p className="text-neutral-600 text-center mb-8">
-              Sign in to manage your tickets and events
-            </p>
-            
-            <Button 
-              onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-2 mb-4"
+      <div className="container-padding py-12">
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow">
+          <h1 className="text-2xl font-semibold mb-6 text-center">Sign In to TixCentral</h1>
+          <div className="space-y-4">
+            <Button
+              onClick={handleGoogleSignIn}
+              className="w-full flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -74,12 +51,11 @@ const Login = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              Sign in with Google
             </Button>
-          </Card>
+          </div>
         </div>
-      </main>
-
+      </div>
       <Footer />
     </div>
   );
