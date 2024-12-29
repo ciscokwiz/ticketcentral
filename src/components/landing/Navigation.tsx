@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, Ticket, ShoppingCart, LogIn } from "lucide-react";
+import { Menu, Ticket, ShoppingCart, LogIn, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -19,6 +19,10 @@ const Navigation = () => {
           <Link to="/events" className="text-neutral-600 hover:text-primary transition-colors font-medium flex items-center gap-2">
             <Ticket className="w-4 h-4" />
             Events
+          </Link>
+          <Link to="/directory" className="text-neutral-600 hover:text-primary transition-colors font-medium flex items-center gap-2">
+            <Search className="w-4 h-4" />
+            Directory
           </Link>
           <Link to="/cart" className="text-neutral-600 hover:text-primary transition-colors font-medium flex items-center gap-2">
             <ShoppingCart className="w-4 h-4" />
@@ -54,6 +58,10 @@ const Navigation = () => {
             <Link to="/events" className="text-neutral-600 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-neutral-200/50 rounded-lg flex items-center gap-2">
               <Ticket className="w-4 h-4" />
               Events
+            </Link>
+            <Link to="/directory" className="text-neutral-600 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-neutral-200/50 rounded-lg flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              Directory
             </Link>
             <Link to="/cart" className="text-neutral-600 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-neutral-200/50 rounded-lg flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" />

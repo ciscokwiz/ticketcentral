@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Events from "./pages/Events";
+import Directory from "./pages/Directory";
 import Login from "./pages/Login";
 import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
@@ -24,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/directory" element={<Directory />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
