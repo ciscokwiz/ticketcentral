@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getDatabase } from 'firebase/database';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCp5G1bFCFM9OldERKr9cU3gKc-pI31HGU",
@@ -10,10 +10,11 @@ const firebaseConfig = {
   storageBucket: "ticketcentral-519b8.firebasestorage.app",
   messagingSenderId: "232689485572",
   appId: "1:232689485572:web:da1286e8aada72b100f251",
-  measurementId: "G-Z7DCDRDYPW"
+  measurementId: "G-Z7DCDRDYPW",
+  databaseURL: "https://ticketcentral-519b8-default-rtdb.firebaseio.com"
 };
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const analytics = getAnalytics(app);
+export const rtdb = getDatabase(app);
