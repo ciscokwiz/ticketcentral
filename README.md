@@ -1,1 +1,1 @@
-# Welcome to your Lovable Project!
+# ticketcentral.cv is a premium ticket management website 
