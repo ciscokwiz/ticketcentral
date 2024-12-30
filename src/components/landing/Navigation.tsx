@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Menu, Ticket, ShoppingCart, LogIn, Search, Plus, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
@@ -11,6 +12,8 @@ const Navigation = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+  const cartCount = cartItems.length;
 
   const handleLogout = async () => {
     try {
@@ -56,7 +59,14 @@ const Navigation = () => {
                 </Link>
               )}
               <Link to="/cart" className="text-neutral-600 hover:text-primary transition-colors font-medium flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4" />
+                <div className="relative">
+                  <ShoppingCart className="w-4 h-4" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
                 Cart
               </Link>
             </div>
@@ -130,7 +140,14 @@ const Navigation = () => {
                   className="text-neutral-600 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-neutral-200/50 rounded-lg flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <ShoppingCart className="w-4 h-4" />
+                  <div className="relative">
+                    <ShoppingCart className="w-4 h-4" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </div>
                   Cart
                 </Link>
                 <hr className="border-neutral-200" />

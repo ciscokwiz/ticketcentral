@@ -8,6 +8,8 @@ import {
   User
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -30,22 +32,48 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        toast({
+          title: "Success!",
+          description: "Successfully signed in with Google",
+        });
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
       console.error('Error signing in with Google:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to sign in with Google",
+      });
       throw error;
     }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      if (result.user) {
+        toast({
+          title: "Success!",
+          description: "Successfully signed in",
+        });
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
       console.error('Error signing in with email:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to sign in",
+      });
       throw error;
     }
   };
@@ -53,8 +81,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     try {
       await signOut(auth);
-    } catch (error) {
+      toast({
+        title: "Success!",
+        description: "Successfully signed out",
+      });
+      navigate('/');
+    } catch (error: any) {
       console.error('Error signing out:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to sign out",
+      });
       throw error;
     }
   };
@@ -65,7 +103,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   const value = {
