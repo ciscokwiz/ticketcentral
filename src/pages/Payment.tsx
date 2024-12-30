@@ -16,7 +16,7 @@ const Payment = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container mx-auto px-4 pt-32 pb-16">
+      <main className="container mx-auto px-4 pt-12 lg:pt-32 pb-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Payment</h1>
           
