@@ -116,7 +116,7 @@ const Events = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container-padding pt-32 pb-16">
+      <main className="container-padding pt-12 lg:pt-32 pb-16">
         <div className="max-w-6xl mx-auto">
           <h1 className="heading-lg mb-8">Discover Events</h1>
           
