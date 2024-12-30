@@ -2,9 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Analytics } from "@vercel/analytics/react"
 import Index from "./pages/Index";
 import Events from "./pages/Events";
 import Directory from "./pages/Directory";
@@ -15,6 +14,13 @@ import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import CreateEvent from "./pages/CreateEvent";
+import { useAuth } from "./contexts/AuthContext";
+
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const { currentUser } = useAuth();
+  return currentUser ? <>{children}</> : <Navigate to="/login" />;
+};
 
 const queryClient = new QueryClient();
 
@@ -24,7 +30,6 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <Analytics />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -32,7 +37,22 @@ const App = () => (
             <Route path="/directory" element={<Directory />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/create-event" 
+              element={
+                <PrivateRoute>
+                  <CreateEvent />
+                </PrivateRoute>
+              } 
+            />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

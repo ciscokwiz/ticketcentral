@@ -1,10 +1,13 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, Plus, Minus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +18,8 @@ import {
 const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const { toast } = useToast();
+  const navigate = useNavigate();
   
   const categories = [
     "Music",
@@ -56,6 +61,49 @@ const Events = () => {
       image: "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&q=80"
     },
   ];
+
+  const [quantities, setQuantities] = useState<{ [key: number]: number }>(
+    events.reduce((acc, event) => ({ ...acc, [event.id]: 1 }), {})
+  );
+
+  const handleQuantityChange = (eventId: number, increment: boolean) => {
+    setQuantities(prev => ({
+      ...prev,
+      [eventId]: Math.max(1, prev[eventId] + (increment ? 1 : -1))
+    }));
+  };
+
+  const addToCart = (event: any) => {
+    const quantity = quantities[event.id];
+    const cartItem = {
+      ...event,
+      quantity,
+      totalPrice: parseFloat(event.price) * quantity
+    };
+    
+    // Get existing cart items from localStorage
+    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    
+    // Check if item already exists in cart
+    const existingItemIndex = existingCart.findIndex((item: any) => item.id === event.id);
+    
+    if (existingItemIndex >= 0) {
+      // Update quantity if item exists
+      existingCart[existingItemIndex].quantity += quantity;
+      existingCart[existingItemIndex].totalPrice = parseFloat(event.price) * existingCart[existingItemIndex].quantity;
+    } else {
+      // Add new item if it doesn't exist
+      existingCart.push(cartItem);
+    }
+    
+    // Save updated cart to localStorage
+    localStorage.setItem('cart', JSON.stringify(existingCart));
+    
+    toast({
+      title: "Added to cart",
+      description: `${quantity} ticket${quantity > 1 ? 's' : ''} for ${event.title}`,
+    });
+  };
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,11 +173,34 @@ const Events = () => {
                 <div className="p-4">
                   <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
                   <p className="text-neutral-600 mb-2">{event.location}</p>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <span className="text-sm bg-accent-purple/10 text-accent-purple px-2 py-1 rounded-full">
                       {event.category}
                     </span>
                     <span className="font-semibold">${event.price}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleQuantityChange(event.id, false)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center">{quantities[event.id]}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleQuantityChange(event.id, true)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button onClick={() => addToCart(event)}>
+                      Add to Cart
+                    </Button>
                   </div>
                 </div>
               </Card>

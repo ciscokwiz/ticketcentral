@@ -1,10 +1,33 @@
 import { useState } from "react";
-import { Menu, Ticket, ShoppingCart, LogIn, Search } from "lucide-react";
+import { Menu, Ticket, ShoppingCart, LogIn, Search, Plus, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+      toast({
+        title: "Logged out successfully",
+        description: "Come back soon!",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description: "Please try again.",
+      });
+    }
+  };
 
   return (
     <>
@@ -26,6 +49,12 @@ const Navigation = () => {
                 <Search className="w-4 h-4" />
                 Directory
               </Link>
+              {currentUser && (
+                <Link to="/create-event" className="text-neutral-600 hover:text-primary transition-colors font-medium flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create Event
+                </Link>
+              )}
               <Link to="/cart" className="text-neutral-600 hover:text-primary transition-colors font-medium flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4" />
                 Cart
@@ -33,10 +62,22 @@ const Navigation = () => {
             </div>
             
             <div className="hidden md:flex items-center gap-4">
-              <Link to="/login" className="button-secondary flex items-center gap-2">
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </Link>
+              {currentUser ? (
+                <div className="flex items-center gap-4">
+                  <Link to="/dashboard" className="button-secondary">
+                    Dashboard
+                  </Link>
+                  <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/login" className="button-secondary flex items-center gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Link>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -74,6 +115,16 @@ const Navigation = () => {
                   <Search className="w-4 h-4" />
                   Directory
                 </Link>
+                {currentUser && (
+                  <Link 
+                    to="/create-event" 
+                    className="text-neutral-600 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-neutral-200/50 rounded-lg flex items-center gap-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Event
+                  </Link>
+                )}
                 <Link 
                   to="/cart" 
                   className="text-neutral-600 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-neutral-200/50 rounded-lg flex items-center gap-2"
@@ -83,14 +134,37 @@ const Navigation = () => {
                   Cart
                 </Link>
                 <hr className="border-neutral-200" />
-                <Link 
-                  to="/login" 
-                  className="button-secondary w-full flex items-center justify-center gap-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Link>
+                {currentUser ? (
+                  <>
+                    <Link 
+                      to="/dashboard" 
+                      className="button-secondary w-full flex items-center justify-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <Link 
+                    to="/login" 
+                    className="button-secondary w-full flex items-center justify-center gap-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                )}
               </div>
             </motion.div>
           )}

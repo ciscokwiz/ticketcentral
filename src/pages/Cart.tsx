@@ -1,25 +1,63 @@
+import { useEffect, useState } from "react";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
+import { Plus, Minus, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface CartItem {
+  id: number;
+  title: string;
+  price: string;
+  quantity: number;
+  totalPrice: number;
+  date: string;
+}
 
 const Cart = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   
-  // Placeholder cart data
-  const cartItems = [
-    {
-      id: 1,
-      eventName: "Summer Music Festival",
-      quantity: 2,
-      price: 99.99,
-      date: "2024-07-15",
-    }
-  ];
+  useEffect(() => {
+    const items = JSON.parse(localStorage.getItem('cart') || '[]');
+    setCartItems(items);
+  }, []);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const updateQuantity = (itemId: number, increment: boolean) => {
+    setCartItems(prevItems => {
+      const updatedItems = prevItems.map(item => {
+        if (item.id === itemId) {
+          const newQuantity = Math.max(1, item.quantity + (increment ? 1 : -1));
+          return {
+            ...item,
+            quantity: newQuantity,
+            totalPrice: parseFloat(item.price) * newQuantity
+          };
+        }
+        return item;
+      });
+      localStorage.setItem('cart', JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+  };
+
+  const removeItem = (itemId: number) => {
+    setCartItems(prevItems => {
+      const updatedItems = prevItems.filter(item => item.id !== itemId);
+      localStorage.setItem('cart', JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+    toast({
+      title: "Item removed",
+      description: "The item has been removed from your cart.",
+    });
+  };
+
+  const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
   const tax = subtotal * 0.1; // 10% tax
   const total = subtotal + tax;
 
@@ -38,11 +76,34 @@ const Cart = () => {
                   <Card key={item.id} className="p-6 mb-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-semibold">{item.eventName}</h3>
+                        <h3 className="font-semibold">{item.title}</h3>
                         <p className="text-sm text-neutral-600">Date: {item.date}</p>
-                        <p className="text-sm text-neutral-600">Quantity: {item.quantity}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => updateQuantity(item.id, false)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => updateQuantity(item.id, true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => removeItem(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-semibold">${item.totalPrice.toFixed(2)}</p>
                     </div>
                   </Card>
                 ))}
