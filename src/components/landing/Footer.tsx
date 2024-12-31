@@ -1,15 +1,37 @@
-import { Calendar, Mail, Phone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Calendar, Mail, Phone, Ticket } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Footer = () => {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleCreateEventClick = (e: React.MouseEvent) => {
+    if (!currentUser) {
+      e.preventDefault();
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create an event",
+        variant: "default"
+      });
+      navigate("/login");
+    }
+  };
+
   return (
     <footer className="border-t border-neutral-200 bg-white">
       <div className="container-padding py-12 md:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-primary rounded-full"></div>
-              <span className="text-xl font-semibold">TixCentral</span>
+              <div className="relative w-8 h-8 bg-accent-purple rounded-xl flex items-center justify-center transform rotate-12">
+                <Ticket className="w-5 h-5 text-white absolute transform -rotate-12" />
+              </div>
+              <span className="text-xl font-semibold bg-gradient-to-r from-primary to-accent-purple bg-clip-text text-transparent">
+                TixCentral
+              </span>
             </div>
             <p className="text-neutral-600 text-sm">
               Your Trusted Event Ticketing Platform
@@ -20,7 +42,15 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Events</h4>
             <ul className="space-y-3 text-sm text-neutral-600">
               <li><Link to="/events" className="hover:text-primary transition-colors">Browse Events</Link></li>
-              <li><Link to="/events/create" className="hover:text-primary transition-colors">Create Event</Link></li>
+              <li>
+                <Link 
+                  to={currentUser ? "/create-event" : "#"} 
+                  onClick={handleCreateEventClick}
+                  className="hover:text-primary transition-colors"
+                >
+                  Create Event
+                </Link>
+              </li>
               <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
             </ul>
           </div>
@@ -51,6 +81,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
+
         </div>
 
         <div className="border-t border-neutral-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">

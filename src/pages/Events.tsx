@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ref, update } from 'firebase/database';
 import { rtdb } from '@/lib/firebase';
 import { EventData } from "@/services/eventService";
+import { Loader2 } from "lucide-react";
 
 const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -94,8 +95,8 @@ const Events = () => {
         <Navigation />
         <main className="container-padding pt-32 pb-16">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-center h-64">
-              <div className="text-lg text-gray-600">Loading events...</div>
+            <div className="flex items-center justify-center h-[60vh]">
+              <Loader2 className="w-8 h-8 animate-spin text-accent-purple" />
             </div>
           </div>
         </main>

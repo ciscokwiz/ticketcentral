@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Menu, Ticket, ShoppingCart, LogIn, Search, Plus, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
@@ -38,8 +37,12 @@ const Navigation = () => {
         <div className="container mx-auto px-4 pt-4">
           <div className="glass-panel rounded-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-lg backdrop-blur-md">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full"></div>
-              <span className="text-lg sm:text-xl font-semibold">TixCentral</span>
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 bg-accent-purple rounded-xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
+                <Ticket className="w-5 h-5 sm:w-6 sm:h-6 text-white absolute transform -rotate-12" />
+              </div>
+              <span className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-primary to-accent-purple bg-clip-text text-transparent">
+                TixCentral
+              </span>
             </Link>
             
             {/* Desktop Navigation */}
@@ -187,7 +190,6 @@ const Navigation = () => {
           )}
         </div>
       </nav>
-      {/* Spacer to prevent content from being hidden under the fixed navbar */}
       <div className="h-24 sm:h-28" />
     </>
   );
