@@ -5,7 +5,8 @@ import {
   signOut, 
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  User
+  User,
+  AuthError
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -46,12 +47,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         navigate('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error signing in with Google:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to sign in with Google",
+        description: "Failed to sign in with Google. Please try again.",
       });
       throw error;
     }
@@ -67,12 +68,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         navigate('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error signing in with email:', error);
+      let errorMessage = "Failed to sign in";
+      
+      // Type guard to check if error is AuthError
+      if (error && typeof error === 'object' && 'code' in error) {
+        const authError = error as AuthError;
+        switch (authError.code) {
+          case 'auth/invalid-login-credentials':
+            errorMessage = "Invalid email or password. Please check your credentials and try again.";
+            break;
+          case 'auth/user-not-found':
+            errorMessage = "No account found with this email. Please sign up first.";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Incorrect password. Please try again.";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Too many failed attempts. Please try again later.";
+            break;
+          default:
+            errorMessage = "An error occurred during sign in. Please try again.";
+        }
+      }
+
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to sign in",
+        description: errorMessage,
       });
       throw error;
     }
@@ -86,12 +110,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: "Successfully signed out",
       });
       navigate('/');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error signing out:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to sign out",
+        description: "Failed to sign out. Please try again.",
       });
       throw error;
     }
