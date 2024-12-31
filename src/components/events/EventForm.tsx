@@ -47,7 +47,7 @@ const EventForm = () => {
     setLoading(true);
 
     try {
-      const eventData: EventData = {
+      const eventData: Omit<EventData, 'id'> = {
         ...formData,
         price: parseFloat(formData.price),
         availableTickets: parseInt(formData.availableTickets),

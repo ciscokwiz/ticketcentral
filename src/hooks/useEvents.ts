@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllEvents } from '@/services/eventService';
+import { getAllEvents, EventData } from '@/services/eventService';
 
 export const useEvents = () => {
-  return useQuery({
+  return useQuery<EventData[]>({
     queryKey: ['events'],
     queryFn: getAllEvents,
   });
