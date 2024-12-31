@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface EventCardProps {
   event: {
@@ -40,17 +41,23 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <img 
-        src={event.image} 
-        alt={event.title} 
-        className="w-full h-48 object-cover"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.src = "/placeholder.svg";
-        }}
-      />
+      <Link to={`/events/${event.id}`}>
+        <img 
+          src={event.image} 
+          alt={event.title} 
+          className="w-full h-48 object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = "/placeholder.svg";
+          }}
+        />
+      </Link>
       <div className="p-4">
-        <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
+        <Link to={`/events/${event.id}`}>
+          <h3 className="text-xl font-semibold mb-2 hover:text-accent-purple transition-colors">
+            {event.title}
+          </h3>
+        </Link>
         <p className="text-neutral-600 mb-2">{event.location}</p>
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm bg-accent-purple/10 text-accent-purple px-2 py-1 rounded-full">

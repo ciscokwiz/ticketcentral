@@ -15,6 +15,9 @@ import Payment from "./pages/Payment";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import CreateEvent from "./pages/CreateEvent";
+import FAQ from "./pages/FAQ";
+import Contact from "./pages/Contact";
+import EventInfo from "./pages/EventInfo";
 import { useAuth } from "./contexts/AuthContext";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -34,29 +37,18 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/events/:id" element={<EventInfo />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/create-event" 
-              element={
-                <PrivateRoute>
-                  <CreateEvent />
-                </PrivateRoute>
-              } 
-            />
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/create-event" element={<PrivateRoute><CreateEvent /></PrivateRoute>} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </TooltipProvider>
       </AuthProvider>

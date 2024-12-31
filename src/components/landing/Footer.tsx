@@ -51,7 +51,6 @@ const Footer = () => {
                   Create Event
                 </Link>
               </li>
-              <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
             </ul>
           </div>
 
@@ -81,7 +80,6 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-
         </div>
 
         <div className="border-t border-neutral-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
