@@ -18,6 +18,8 @@ import CreateEvent from "./pages/CreateEvent";
 import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
 import EventInfo from "./pages/EventInfo";
+import ManageEvents from "./pages/ManageEvents";
+import EditEvent from "./pages/EditEvent";
 import { useAuth } from "./contexts/AuthContext";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -42,6 +44,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/manage-events" element={<PrivateRoute><ManageEvents /></PrivateRoute>} />
+            <Route path="/events/:id/edit" element={<PrivateRoute><EditEvent /></PrivateRoute>} />
             <Route path="/create-event" element={<PrivateRoute><CreateEvent /></PrivateRoute>} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />

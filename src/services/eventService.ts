@@ -3,16 +3,19 @@ import { rtdb } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 
 export interface EventData {
-  id: string;  // Changed from optional to required
+  id?: string;
   title: string;
   description: string;
   category: string;
   date: string;
   location: string;
   price: number;
-  image: string;
+  images: string[];
+  videos?: string[];
   availableTickets: number;
   organizerId: string;
+  organizerRemarks: string;
+  additionalInfo?: string;
   createdAt: string;
 }
 

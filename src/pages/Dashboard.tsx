@@ -1,11 +1,12 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
-import { User, LogOut, Ticket, Calendar } from "lucide-react";
+import TicketsList from "@/components/dashboard/TicketsList";
+import { User, LogOut, Settings } from "lucide-react";
 
 const Dashboard = () => {
   const { currentUser, logout } = useAuth();
@@ -29,8 +30,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Profile Card */}
+        <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader className="flex flex-row items-center gap-4">
               <Avatar className="h-16 w-16">
@@ -52,31 +52,23 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Tickets Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Ticket className="h-5 w-5" />
-                My Tickets
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">No tickets purchased yet.</p>
-            </CardContent>
+          <Card className="hover:shadow-lg transition-shadow">
+            <Link to="/manage-events">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Manage Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">View and manage your created events</p>
+              </CardContent>
+            </Link>
           </Card>
 
-          {/* Upcoming Events Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Upcoming Events
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">No upcoming events.</p>
-            </CardContent>
-          </Card>
+          <div className="md:col-span-2">
+            <TicketsList />
+          </div>
         </div>
       </div>
       <Footer />

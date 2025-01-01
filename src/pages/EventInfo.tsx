@@ -4,6 +4,8 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { ref, get } from "firebase/database";
+import { rtdb } from "@/lib/firebase";
 import {
   Carousel,
   CarouselContent,
@@ -18,23 +20,15 @@ const EventInfo = () => {
   const { data: event, isLoading } = useQuery({
     queryKey: ["event", id],
     queryFn: async () => {
-      // This would be replaced with your actual API call
+      if (!id) throw new Error("Event ID is required");
+      const eventRef = ref(rtdb, `events/${id}`);
+      const snapshot = await get(eventRef);
+      if (!snapshot.exists()) {
+        throw new Error("Event not found");
+      }
       return {
-        id: "1",
-        title: "Summer Music Festival",
-        description: "Join us for an unforgettable summer music festival featuring top artists from around the world. Experience amazing performances, great food, and incredible atmosphere.",
-        category: "Music",
-        date: "2024-07-15",
-        price: 99.99,
-        location: "Central Park",
-        availableTickets: 500,
-        images: [
-          "https://images.unsplash.com/photo-1514525253161-7a46d19cd819",
-          "https://images.unsplash.com/photo-1498936178812-4b2e558d2937",
-          "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac"
-        ],
-        organizerRemarks: "This year's festival promises to be our biggest yet. We've curated an incredible lineup of artists and have enhanced the venue layout for an optimal experience.",
-        additionalInfo: "Please bring valid ID. No outside food or drinks allowed. Free parking available."
+        id,
+        ...snapshot.val()
       };
     }
   });
@@ -58,21 +52,23 @@ const EventInfo = () => {
             <h1 className="heading-lg mb-4">{event.title}</h1>
             <p className="text-neutral-600 text-lg mb-8">{event.description}</p>
             
-            <Carousel className="w-full max-w-4xl mx-auto mb-12">
-              <CarouselContent>
-                {event.images.map((image, index) => (
-                  <CarouselItem key={index}>
-                    <img
-                      src={`${image}?auto=format&fit=crop&w=1200&q=80`}
-                      alt={`${event.title} - Image ${index + 1}`}
-                      className="w-full h-[400px] object-cover rounded-lg"
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
+            {event.images && event.images.length > 0 && (
+              <Carousel className="w-full max-w-4xl mx-auto mb-12">
+                <CarouselContent>
+                  {event.images.map((image: string, index: number) => (
+                    <CarouselItem key={index}>
+                      <img
+                        src={image}
+                        alt={`${event.title} - Image ${index + 1}`}
+                        className="w-full h-[400px] object-cover rounded-lg"
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            )}
 
             <div className="grid md:grid-cols-2 gap-12">
               <div>
@@ -89,8 +85,12 @@ const EventInfo = () => {
               <div>
                 <h2 className="text-2xl font-semibold mb-4">Organizer's Remarks</h2>
                 <p className="text-neutral-600 mb-6">{event.organizerRemarks}</p>
-                <h3 className="text-xl font-semibold mb-2">Additional Information</h3>
-                <p className="text-neutral-600">{event.additionalInfo}</p>
+                {event.additionalInfo && (
+                  <>
+                    <h3 className="text-xl font-semibold mb-2">Additional Information</h3>
+                    <p className="text-neutral-600">{event.additionalInfo}</p>
+                  </>
+                )}
               </div>
             </div>
 

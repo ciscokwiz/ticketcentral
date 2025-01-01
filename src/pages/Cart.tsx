@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import Navigation from "@/components/landing/Navigation";
 import Footer from "@/components/landing/Footer";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Plus, Minus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ref, update, get } from 'firebase/database';
+import { rtdb } from '@/lib/firebase';
+import { useAuth } from "@/contexts/AuthContext";
+import CartItem from "@/components/cart/CartItem";
+import CartSummary from "@/components/cart/CartSummary";
 
 interface CartItem {
   id: number;
@@ -20,7 +23,9 @@ interface CartItem {
 const Cart = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [processing, setProcessing] = useState(false);
   
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -57,15 +62,78 @@ const Cart = () => {
     });
   };
 
+  const handleFreeEventCheckout = async () => {
+    if (!currentUser) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please login to continue.",
+      });
+      navigate('/login');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      for (const item of cartItems) {
+        if (parseFloat(item.price) === 0) {
+          const eventRef = ref(rtdb, `events/${item.id}`);
+          const eventSnapshot = await get(eventRef);
+          const eventData = eventSnapshot.val();
+
+          if (!eventData) {
+            throw new Error(`Event ${item.id} not found`);
+          }
+
+          if (eventData.availableTickets < item.quantity) {
+            throw new Error(`Not enough tickets available for ${eventData.title}`);
+          }
+
+          const updates: { [key: string]: any } = {};
+          
+          // Update available tickets with exact quantity
+          updates[`events/${item.id}/availableTickets`] = eventData.availableTickets - item.quantity;
+          
+          // Update user's purchased tickets
+          const userTicketsRef = `users/${currentUser.uid}/purchasedTickets/${item.id}`;
+          const existingTicketsSnapshot = await get(ref(rtdb, userTicketsRef));
+          const existingTickets = existingTicketsSnapshot.val() || 0;
+          updates[userTicketsRef] = existingTickets + item.quantity;
+
+          await update(ref(rtdb), updates);
+        }
+      }
+
+      localStorage.setItem('cart', '[]');
+      setCartItems([]);
+      
+      toast({
+        title: "Success!",
+        description: "Your free tickets have been reserved.",
+      });
+      
+      navigate('/dashboard');
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process free tickets",
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
-  const tax = subtotal * 0.1; // 10% tax
+  const tax = subtotal * 0.1;
   const total = subtotal + tax;
+  const hasOnlyFreeEvents = cartItems.length > 0 && cartItems.every(item => parseFloat(item.price) === 0);
 
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container mx-auto px-4 pt-12 lg:pt-32 pb-16">
+      <main className="container mx-auto px-4 pt-32 pb-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
           
@@ -73,67 +141,25 @@ const Cart = () => {
             <div className="grid gap-8 md:grid-cols-3">
               <div className="md:col-span-2">
                 {cartItems.map((item) => (
-                  <Card key={item.id} className="p-6 mb-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <p className="text-sm text-neutral-600">Date: {item.date}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => updateQuantity(item.id, false)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-8 text-center">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => updateQuantity(item.id, true)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => removeItem(item.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="font-semibold">${item.totalPrice.toFixed(2)}</p>
-                    </div>
-                  </Card>
+                  <CartItem
+                    key={item.id}
+                    {...item}
+                    onUpdateQuantity={updateQuantity}
+                    onRemove={removeItem}
+                  />
                 ))}
               </div>
               
               <div>
-                <Card className="p-6">
-                  <h3 className="font-semibold mb-4">Order Summary</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tax</span>
-                      <span>${tax.toFixed(2)}</span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between font-semibold">
-                      <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <Button 
-                    className="w-full mt-6"
-                    onClick={() => navigate('/payment')}
-                  >
-                    Proceed to Payment
-                  </Button>
-                </Card>
+                <CartSummary
+                  subtotal={subtotal}
+                  tax={tax}
+                  total={total}
+                  hasOnlyFreeEvents={hasOnlyFreeEvents}
+                  processing={processing}
+                  onCheckout={handleFreeEventCheckout}
+                  onPayment={() => navigate('/payment')}
+                />
               </div>
             </div>
           ) : (

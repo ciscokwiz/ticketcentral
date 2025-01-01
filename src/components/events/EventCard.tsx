@@ -4,19 +4,10 @@ import { Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { EventData } from "@/services/eventService";
 
 interface EventCardProps {
-  event: {
-    id: string;
-    title: string;
-    category: string;
-    date: string;
-    price: number;
-    location: string;
-    image: string;
-    availableTickets: number;
-    description: string;
-  };
+  event: EventData;
   onAddToCart: (eventId: string, quantity: number) => void;
 }
 
@@ -39,16 +30,20 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
     });
   };
 
+  // Default image if none is provided
+  const defaultImage = "/placeholder.svg";
+  const displayImage = event?.images?.length ? event.images[0] : defaultImage;
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <Link to={`/events/${event.id}`}>
         <img 
-          src={event.image} 
+          src={displayImage}
           alt={event.title} 
           className="w-full h-48 object-cover"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = "/placeholder.svg";
+            target.src = defaultImage;
           }}
         />
       </Link>
@@ -84,7 +79,7 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <Button onClick={() => onAddToCart(event.id, quantity)}>
+          <Button onClick={() => onAddToCart(event.id!, quantity)}>
             Add to Cart
           </Button>
         </div>
