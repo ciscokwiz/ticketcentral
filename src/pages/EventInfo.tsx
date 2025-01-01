@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { ref, get } from "firebase/database";
 import { rtdb } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 import {
   Carousel,
   CarouselContent,
@@ -16,6 +17,7 @@ import {
 
 const EventInfo = () => {
   const { id } = useParams();
+  const { toast } = useToast();
   
   const { data: event, isLoading } = useQuery({
     queryKey: ["event", id],
@@ -32,6 +34,38 @@ const EventInfo = () => {
       };
     }
   });
+
+  const handleAddToCart = () => {
+    if (!event) return;
+
+    const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItemIndex = cartItems.findIndex((item: any) => item.id === event.id);
+
+    if (existingItemIndex >= 0) {
+      toast({
+        title: "Already in cart",
+        description: "This event is already in your cart",
+      });
+      return;
+    }
+
+    const newItem = {
+      id: event.id,
+      title: event.title,
+      price: event.price,
+      quantity: 1,
+      totalPrice: event.price,
+      date: event.date
+    };
+
+    cartItems.push(newItem);
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+    
+    toast({
+      title: "Added to cart",
+      description: "Event has been added to your cart",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -95,7 +129,7 @@ const EventInfo = () => {
             </div>
 
             <div className="mt-12 text-center">
-              <Button size="lg" className="px-8">
+              <Button size="lg" className="px-8" onClick={handleAddToCart}>
                 Add to Cart
               </Button>
             </div>
