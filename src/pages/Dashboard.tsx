@@ -39,8 +39,8 @@ const Dashboard = () => {
                   <User className="h-8 w-8" />
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <CardTitle>{currentUser.displayName || 'User'}</CardTitle>
+              <div className="flex flex-col gap-3">
+                <CardTitle className="text-accent-purple">{currentUser.displayName || 'User'}</CardTitle>
                 <p className="text-sm text-muted-foreground">{currentUser.email}</p>
               </div>
             </CardHeader>
