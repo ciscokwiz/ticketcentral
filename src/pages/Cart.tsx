@@ -14,10 +14,11 @@ import CartSummary from "@/components/cart/CartSummary";
 interface CartItem {
   id: number;
   title: string;
-  price: string;
+  price: number; // Changed from string to number
   quantity: number;
   totalPrice: number;
   date: string;
+  tierName?: string;
 }
 
 const Cart = () => {
@@ -29,7 +30,13 @@ const Cart = () => {
   
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartItems(items);
+    // Convert price strings to numbers when loading from localStorage
+    const parsedItems = items.map((item: any) => ({
+      ...item,
+      price: parseFloat(item.price) || 0,
+      totalPrice: parseFloat(item.totalPrice) || 0
+    }));
+    setCartItems(parsedItems);
   }, []);
 
   const updateQuantity = (itemId: number, increment: boolean) => {
@@ -40,7 +47,7 @@ const Cart = () => {
           return {
             ...item,
             quantity: newQuantity,
-            totalPrice: parseFloat(item.price) * newQuantity
+            totalPrice: item.price * newQuantity
           };
         }
         return item;
@@ -76,7 +83,7 @@ const Cart = () => {
     setProcessing(true);
     try {
       for (const item of cartItems) {
-        if (parseFloat(item.price) === 0) {
+        if (item.price === 0) {
           const eventRef = ref(rtdb, `events/${item.id}`);
           const eventSnapshot = await get(eventRef);
           const eventData = eventSnapshot.val();
@@ -124,10 +131,10 @@ const Cart = () => {
     }
   };
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.totalPrice || 0), 0);
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
-  const hasOnlyFreeEvents = cartItems.length > 0 && cartItems.every(item => parseFloat(item.price) === 0);
+  const hasOnlyFreeEvents = cartItems.length > 0 && cartItems.every(item => item.price === 0);
 
   return (
     <div className="min-h-screen bg-neutral-100">

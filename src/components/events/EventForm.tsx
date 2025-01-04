@@ -8,6 +8,7 @@ import { createEvent, EventData } from '@/services/eventService';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import TicketTierForm, { TicketTier } from './TicketTierForm';
 
 interface EventFormProps {
   initialData?: EventData;
@@ -23,14 +24,13 @@ const EventForm = ({ initialData }: EventFormProps) => {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
+  const [ticketTiers, setTicketTiers] = useState<TicketTier[]>(initialData?.ticketTiers || []);
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
     category: initialData?.category || '',
     date: initialData?.date || '',
     location: initialData?.location || '',
-    price: initialData?.price?.toString() || '',
-    availableTickets: initialData?.availableTickets?.toString() || '',
     organizerRemarks: initialData?.organizerRemarks || '',
     additionalInfo: initialData?.additionalInfo || ''
   });
@@ -51,12 +51,12 @@ const EventForm = ({ initialData }: EventFormProps) => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setImages(prev => [...prev, ...files].slice(0, 5)); // Limit to 5 images
+    setImages(prev => [...prev, ...files].slice(0, 5));
   };
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setVideos(prev => [...prev, ...files].slice(0, 2)); // Limit to 2 videos
+    setVideos(prev => [...prev, ...files].slice(0, 2));
   };
 
   const removeImage = (index: number) => {
@@ -69,6 +69,16 @@ const EventForm = ({ initialData }: EventFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (ticketTiers.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please add at least one ticket tier",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -77,8 +87,7 @@ const EventForm = ({ initialData }: EventFormProps) => {
 
       const eventData: Omit<EventData, 'id'> = {
         ...formData,
-        price: parseFloat(formData.price),
-        availableTickets: parseInt(formData.availableTickets),
+        ticketTiers,
         images: imageUrls,
         videos: videoUrls,
         organizerId: currentUser?.uid || '',
@@ -99,191 +108,189 @@ const EventForm = ({ initialData }: EventFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium mb-2">Event Title</label>
-        <Input
-          id="title"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
-        <Textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="organizerRemarks" className="block text-sm font-medium mb-2">Organizer's Remarks</label>
-        <Textarea
-          id="organizerRemarks"
-          name="organizerRemarks"
-          value={formData.organizerRemarks}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="additionalInfo" className="block text-sm font-medium mb-2">Additional Information</label>
-        <Textarea
-          id="additionalInfo"
-          name="additionalInfo"
-          value={formData.additionalInfo}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Images (Max 5)</label>
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={handleImageUpload}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={images.length >= 5}
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Images
-        </Button>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {images.map((img, index) => (
-            <div key={index} className="relative">
-              <img
-                src={URL.createObjectURL(img)}
-                alt={`Upload ${index + 1}`}
-                className="w-20 h-20 object-cover rounded"
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium mb-2">Event Title</label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
               />
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Videos (Max 2)</label>
-        <input
-          type="file"
-          ref={videoInputRef}
-          accept="video/*"
-          multiple
-          className="hidden"
-          onChange={handleVideoUpload}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => videoInputRef.current?.click()}
-          disabled={videos.length >= 2}
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Videos
-        </Button>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {videos.map((video, index) => (
-            <div key={index} className="relative">
-              <video
-                src={URL.createObjectURL(video)}
-                className="w-32 h-32 object-cover rounded"
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
               />
-              <button
-                type="button"
-                onClick={() => removeVideo(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
-          ))}
+
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium mb-2">Category</label>
+              <Select value={formData.category} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium mb-2">Date</label>
+              <Input
+                type="datetime-local"
+                id="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium mb-2">Location</label>
+              <Input
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label htmlFor="category" className="block text-sm font-medium mb-2">Category</label>
-        <Select value={formData.category} onValueChange={handleCategoryChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Ticket Tiers</h2>
+          <TicketTierForm
+            ticketTiers={ticketTiers}
+            setTicketTiers={setTicketTiers}
+          />
+        </div>
 
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium mb-2">Date</label>
-        <Input
-          type="datetime-local"
-          id="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-        />
-      </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Media</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Images (Max 5)</label>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={images.length >= 5}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Images
+              </Button>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {images.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt={`Upload ${index + 1}`}
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-      <div>
-        <label htmlFor="location" className="block text-sm font-medium mb-2">Location</label>
-        <Input
-          id="location"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          required
-        />
-      </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Videos (Max 2)</label>
+              <input
+                type="file"
+                ref={videoInputRef}
+                accept="video/*"
+                multiple
+                className="hidden"
+                onChange={handleVideoUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={videos.length >= 2}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Videos
+              </Button>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {videos.map((video, index) => (
+                  <div key={index} className="relative">
+                    <video
+                      src={URL.createObjectURL(video)}
+                      className="w-32 h-32 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeVideo(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div>
-        <label htmlFor="price" className="block text-sm font-medium mb-2">Price ($)</label>
-        <Input
-          type="number"
-          id="price"
-          name="price"
-          min="0"
-          step="0.01"
-          value={formData.price}
-          onChange={handleChange}
-          required
-        />
-      </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Additional Information</h2>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="organizerRemarks" className="block text-sm font-medium mb-2">Organizer's Remarks</label>
+              <Textarea
+                id="organizerRemarks"
+                name="organizerRemarks"
+                value={formData.organizerRemarks}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-      <div>
-        <label htmlFor="availableTickets" className="block text-sm font-medium mb-2">Available Tickets</label>
-        <Input
-          type="number"
-          id="availableTickets"
-          name="availableTickets"
-          min="1"
-          value={formData.availableTickets}
-          onChange={handleChange}
-          required
-        />
+            <div>
+              <label htmlFor="additionalInfo" className="block text-sm font-medium mb-2">Additional Information</label>
+              <Textarea
+                id="additionalInfo"
+                name="additionalInfo"
+                value={formData.additionalInfo}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>

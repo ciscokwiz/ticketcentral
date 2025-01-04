@@ -7,7 +7,7 @@ const CreateEvent = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container-padding pt-12 lg:pt-32 pb-16">
+      <main className="container-padding pt-32 pb-16">
         <div className="max-w-2xl mx-auto">
           <h1 className="heading-lg mb-8">Create New Event</h1>
           <div className="glass-panel p-6 rounded-lg">

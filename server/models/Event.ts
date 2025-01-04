@@ -1,5 +1,31 @@
 import mongoose from 'mongoose';
 
+const ticketTierSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  availableTickets: {
+    type: Number,
+    required: true
+  },
+  benefits: [{
+    type: String
+  }],
+  isHighlighted: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const eventSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -22,10 +48,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  price: {
-    type: Number,
-    required: true
-  },
+  ticketTiers: [ticketTierSchema],
   images: [{
     type: String,
     required: true
@@ -34,10 +57,6 @@ const eventSchema = new mongoose.Schema({
     type: String,
     maxItems: 2
   }],
-  availableTickets: {
-    type: Number,
-    required: true
-  },
   organizer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

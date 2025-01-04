@@ -2,6 +2,15 @@ import { ref, get, child, push } from 'firebase/database';
 import { rtdb } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 
+export interface TicketTier {
+  name: string;
+  description: string;
+  price: number;
+  availableTickets: number;
+  benefits: string[];
+  isHighlighted: boolean;
+}
+
 export interface EventData {
   id?: string;
   title: string;
@@ -9,14 +18,13 @@ export interface EventData {
   category: string;
   date: string;
   location: string;
-  price: number;
   images: string[];
   videos?: string[];
-  availableTickets: number;
   organizerId: string;
   organizerRemarks: string;
   additionalInfo?: string;
   createdAt: string;
+  ticketTiers: TicketTier[];
 }
 
 export const createEvent = async (eventData: Omit<EventData, 'id'>) => {

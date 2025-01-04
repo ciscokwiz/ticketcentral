@@ -40,7 +40,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      
+      // After successful sign in, show success toast and redirect
       if (result.user) {
+        // Store additional user data in Firebase if needed
+        // const userRef = ref(rtdb, `users/${result.user.uid}`);
+        // await set(userRef, {
+        //   email: result.user.email,
+        //   displayName: result.user.displayName,
+        //   photoURL: result.user.photoURL,
+        //   lastLogin: new Date().toISOString()
+        // });
+
         toast({
           title: "Success!",
           description: "Successfully signed in with Google",
@@ -49,10 +60,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      let errorMessage = "Failed to sign in with Google";
+      
+      if (error instanceof Error) {
+        const authError = error as AuthError;
+        switch (authError.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = "Sign in was cancelled. Please try again.";
+            break;
+          case 'auth/popup-blocked':
+            errorMessage = "Pop-up was blocked by your browser. Please allow pop-ups and try again.";
+            break;
+          default:
+            errorMessage = "An error occurred during sign in. Please try again.";
+        }
+      }
+
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to sign in with Google. Please try again.",
+        description: errorMessage,
       });
       throw error;
     }

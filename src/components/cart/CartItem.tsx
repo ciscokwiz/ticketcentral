@@ -5,10 +5,11 @@ import { Plus, Minus, Trash2 } from "lucide-react";
 interface CartItemProps {
   id: number;
   title: string;
-  price: string;
+  price: number;
   quantity: number;
   totalPrice: number;
   date: string;
+  tierName?: string;
   onUpdateQuantity: (id: number, increment: boolean) => void;
   onRemove: (id: number) => void;
 }
@@ -16,10 +17,11 @@ interface CartItemProps {
 const CartItem = ({ 
   id, 
   title, 
-  price, 
+  price = 0,
   quantity, 
-  totalPrice, 
-  date, 
+  totalPrice = 0,
+  date,
+  tierName,
   onUpdateQuantity, 
   onRemove 
 }: CartItemProps) => {
@@ -29,6 +31,10 @@ const CartItem = ({
         <div>
           <h3 className="font-semibold">{title}</h3>
           <p className="text-sm text-neutral-600">Date: {date}</p>
+          {tierName && (
+            <p className="text-sm text-neutral-600">Tier: {tierName}</p>
+          )}
+          <p className="text-sm text-neutral-600">Price per ticket: ${price.toFixed(2)}</p>
           <div className="flex items-center gap-2 mt-2">
             <Button
               variant="outline"
@@ -54,7 +60,7 @@ const CartItem = ({
             </Button>
           </div>
         </div>
-        <p className="font-semibold">${totalPrice.toFixed(2)}</p>
+        <p className="font-semibold">${(totalPrice || 0).toFixed(2)}</p>
       </div>
     </Card>
   );

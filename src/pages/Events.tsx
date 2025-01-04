@@ -6,8 +6,6 @@ import EventCard from "@/components/events/EventCard";
 import EventFilters from "@/components/events/EventFilters";
 import { useEvents } from "@/hooks/useEvents";
 import { useToast } from "@/hooks/use-toast";
-import { ref, update } from 'firebase/database';
-import { rtdb } from '@/lib/firebase';
 import { EventData } from "@/services/eventService";
 import { Loader2 } from "lucide-react";
 
@@ -19,41 +17,40 @@ const Events = () => {
   const { data: events = [], isLoading, error } = useEvents();
   
   const categories = [
-    "Music",
-    "Sports",
-    "Theater",
-    "Comedy",
-    "Arts",
-    "Food & Drink",
-    "Business",
-    "Technology"
+    "Music", "Sports", "Theater", "Comedy", "Arts", 
+    "Food & Drink", "Business", "Technology"
   ];
 
   const handleAddToCart = async (eventId: string, quantity: number) => {
     const event = events.find(e => e.id === eventId);
     if (!event) return;
 
-    if (quantity > event.availableTickets) {
+    // Calculate total available tickets across all tiers
+    const totalAvailableTickets = event.ticketTiers.reduce(
+      (sum, tier) => sum + tier.availableTickets, 0
+    );
+
+    if (quantity > totalAvailableTickets) {
       toast({
         title: "Not enough tickets",
-        description: `Only ${event.availableTickets} tickets available`,
+        description: `Only ${totalAvailableTickets} tickets available`,
         className: "bg-red-50 border-red-100",
       });
       return;
     }
 
     try {
-      // Update available tickets in Firebase
-      const eventRef = ref(rtdb, `events/${eventId}`);
-      await update(eventRef, {
-        availableTickets: event.availableTickets - quantity
-      });
+      // Get the cheapest ticket tier for cart display
+      const cheapestTier = event.ticketTiers.reduce((min, tier) => 
+        tier.price < min.price ? tier : min, event.ticketTiers[0]);
 
-      // Add to cart in localStorage
       const cartItem = {
-        ...event,
+        id: eventId,
+        title: event.title,
+        price: cheapestTier.price,
         quantity,
-        totalPrice: event.price * quantity
+        totalPrice: cheapestTier.price * quantity,
+        date: event.date
       };
       
       const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -61,7 +58,7 @@ const Events = () => {
       
       if (existingItemIndex >= 0) {
         existingCart[existingItemIndex].quantity += quantity;
-        existingCart[existingItemIndex].totalPrice = event.price * existingCart[existingItemIndex].quantity;
+        existingCart[existingItemIndex].totalPrice = cheapestTier.price * existingCart[existingItemIndex].quantity;
       } else {
         existingCart.push(cartItem);
       }
@@ -125,7 +122,7 @@ const Events = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container-padding pt-12 lg:pt-32 pb-16">
+      <main className="container-padding pt-32 pb-16">
         <div className="max-w-6xl mx-auto">
           <h1 className="heading-lg mb-8">Discover Events</h1>
           
