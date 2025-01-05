@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -69,16 +70,6 @@ const EventForm = ({ initialData }: EventFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (ticketTiers.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please add at least one ticket tier",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -138,12 +129,12 @@ const EventForm = ({ initialData }: EventFormProps) => {
             <div>
               <label htmlFor="category" className="block text-sm font-medium mb-2">Category</label>
               <Select value={formData.category} onValueChange={handleCategoryChange}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full bg-white">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                    <SelectItem key={category} value={category} className="hover:bg-neutral-100">
                       {category}
                     </SelectItem>
                   ))}
@@ -177,7 +168,7 @@ const EventForm = ({ initialData }: EventFormProps) => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4">Ticket Tiers</h2>
+          <h2 className="text-xl font-semibold mb-4">Ticket Tiers (Optional)</h2>
           <TicketTierForm
             ticketTiers={ticketTiers}
             setTicketTiers={setTicketTiers}

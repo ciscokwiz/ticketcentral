@@ -30,7 +30,7 @@ const FAQ = () => {
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
-      <main className="container-padding py-32">
+      <main className="container-padding py-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="heading-lg mb-8">Frequently Asked Questions</h1>
           <Accordion type="single" collapsible className="w-full">

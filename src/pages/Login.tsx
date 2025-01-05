@@ -51,7 +51,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
-      <div className="container-padding py-12 mt-16">
+      <div className="container-padding py-12 mt-8 lg:mt-16">
         <Card className="max-w-md mx-auto">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold text-center">Sign In to TixCentral</CardTitle>

@@ -48,7 +48,10 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  ticketTiers: [ticketTierSchema],
+  ticketTiers: {
+    type: [ticketTierSchema],
+    default: []  // Making it optional with empty array default
+  },
   images: [{
     type: String,
     required: true

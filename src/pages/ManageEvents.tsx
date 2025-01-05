@@ -7,7 +7,7 @@ const ManageEvents = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container-padding pt-32 pb-16">
+      <main className="container-padding py-16">
         <div className="max-w-6xl mx-auto">
           <ManageEventsComponent />
         </div>

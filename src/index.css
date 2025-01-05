@@ -46,3 +46,13 @@
            backdrop-blur-sm border border-white/10;
   }
 }
+
+/* Ensure dropdowns have solid background */
+[role="listbox"],
+[role="combobox"] {
+  @apply bg-white !important;
+}
+
+.select-content {
+  @apply bg-white border shadow-lg !important;
+}

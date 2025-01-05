@@ -80,7 +80,7 @@ const EventInfo = () => {
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
-      <main className="container-padding py-32">
+      <main className="container-padding pt-12 lg:pt-32 pb-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <h1 className="heading-lg mb-4">{event.title}</h1>
