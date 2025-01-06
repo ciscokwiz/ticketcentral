@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -9,13 +8,15 @@ import { createEvent, EventData } from '@/services/eventService';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 import TicketTierForm, { TicketTier } from './TicketTierForm';
 
 interface EventFormProps {
   initialData?: EventData;
+  onSubmit?: (eventData: Omit<EventData, "id">) => Promise<void>;
 }
 
-const EventForm = ({ initialData }: EventFormProps) => {
+const EventForm = ({ initialData, onSubmit }: EventFormProps) => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,7 +26,10 @@ const EventForm = ({ initialData }: EventFormProps) => {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
+  const [useMultipleTiers, setUseMultipleTiers] = useState(false);
   const [ticketTiers, setTicketTiers] = useState<TicketTier[]>(initialData?.ticketTiers || []);
+  const [singleTicketPrice, setSingleTicketPrice] = useState('0');
+  const [availableTickets, setAvailableTickets] = useState('0');
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -36,11 +40,6 @@ const EventForm = ({ initialData }: EventFormProps) => {
     additionalInfo: initialData?.additionalInfo || ''
   });
 
-  const categories = [
-    "Music", "Sports", "Theater", "Comedy", "Arts", 
-    "Food & Drink", "Business", "Technology"
-  ];
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -48,24 +47,6 @@ const EventForm = ({ initialData }: EventFormProps) => {
 
   const handleCategoryChange = (value: string) => {
     setFormData(prev => ({ ...prev, category: value }));
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setImages(prev => [...prev, ...files].slice(0, 5));
-  };
-
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setVideos(prev => [...prev, ...files].slice(0, 2));
-  };
-
-  const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const removeVideo = (index: number) => {
-    setVideos(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,17 +57,36 @@ const EventForm = ({ initialData }: EventFormProps) => {
       const imageUrls = images.map(img => URL.createObjectURL(img));
       const videoUrls = videos.map(vid => URL.createObjectURL(vid));
 
+      let finalTicketTiers: TicketTier[];
+      
+      if (!useMultipleTiers) {
+        finalTicketTiers = [{
+          name: 'Standard Ticket',
+          description: 'Standard entry ticket',
+          price: parseFloat(singleTicketPrice),
+          availableTickets: parseInt(availableTickets),
+          benefits: [],
+          isHighlighted: false
+        }];
+      } else {
+        finalTicketTiers = ticketTiers;
+      }
+
       const eventData: Omit<EventData, 'id'> = {
         ...formData,
-        ticketTiers,
+        ticketTiers: finalTicketTiers,
         images: imageUrls,
         videos: videoUrls,
         organizerId: currentUser?.uid || '',
         createdAt: new Date().toISOString(),
       };
 
-      await createEvent(eventData);
-      navigate('/events');
+      if (onSubmit) {
+        await onSubmit(eventData);
+      } else {
+        await createEvent(eventData);
+        navigate('/events');
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -133,7 +133,7 @@ const EventForm = ({ initialData }: EventFormProps) => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  {categories.map((category) => (
+                  {["Music", "Sports", "Theater", "Comedy", "Arts", "Food & Drink", "Business", "Technology"].map((category) => (
                     <SelectItem key={category} value={category} className="hover:bg-neutral-100">
                       {category}
                     </SelectItem>
@@ -167,12 +167,50 @@ const EventForm = ({ initialData }: EventFormProps) => {
           </div>
         </div>
 
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Ticket Tiers (Optional)</h2>
-          <TicketTierForm
-            ticketTiers={ticketTiers}
-            setTicketTiers={setTicketTiers}
-          />
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={useMultipleTiers}
+              onCheckedChange={setUseMultipleTiers}
+            />
+            <label className="text-sm font-medium">
+              Use multiple ticket tiers
+            </label>
+          </div>
+
+          {!useMultipleTiers ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Ticket Price ($)</label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={singleTicketPrice}
+                  onChange={(e) => setSingleTicketPrice(e.target.value)}
+                  placeholder="Enter ticket price (0 for free events)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Available Tickets</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={availableTickets}
+                  onChange={(e) => setAvailableTickets(e.target.value)}
+                  placeholder="Enter number of available tickets"
+                />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Ticket Tiers</h2>
+              <TicketTierForm
+                ticketTiers={ticketTiers}
+                setTicketTiers={setTicketTiers}
+              />
+            </div>
+          )}
         </div>
 
         <div>
@@ -186,7 +224,10 @@ const EventForm = ({ initialData }: EventFormProps) => {
                 accept="image/*"
                 multiple
                 className="hidden"
-                onChange={handleImageUpload}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setImages(prev => [...prev, ...files].slice(0, 5));
+                }}
               />
               <Button
                 type="button"
@@ -207,7 +248,9 @@ const EventForm = ({ initialData }: EventFormProps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => removeImage(index)}
+                      onClick={() => {
+                        setImages(prev => prev.filter((_, i) => i !== index));
+                      }}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
                     >
                       <X className="w-4 h-4" />
@@ -225,7 +268,10 @@ const EventForm = ({ initialData }: EventFormProps) => {
                 accept="video/*"
                 multiple
                 className="hidden"
-                onChange={handleVideoUpload}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setVideos(prev => [...prev, ...files].slice(0, 2));
+                }}
               />
               <Button
                 type="button"
@@ -245,7 +291,9 @@ const EventForm = ({ initialData }: EventFormProps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => removeVideo(index)}
+                      onClick={() => {
+                        setVideos(prev => prev.filter((_, i) => i !== index));
+                      }}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
                     >
                       <X className="w-4 h-4" />

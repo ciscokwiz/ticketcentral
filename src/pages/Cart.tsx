@@ -5,16 +5,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { ref, update, get } from 'firebase/database';
-import { rtdb } from '@/lib/firebase';
 import { useAuth } from "@/contexts/AuthContext";
 import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
+import { processCheckout } from "@/utils/checkoutUtils";
 
 interface CartItem {
   id: number;
   title: string;
-  price: number; // Changed from string to number
+  price: number;
   quantity: number;
   totalPrice: number;
   date: string;
@@ -30,11 +29,11 @@ const Cart = () => {
   
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('cart') || '[]');
-    // Convert price strings to numbers when loading from localStorage
     const parsedItems = items.map((item: any) => ({
       ...item,
       price: parseFloat(item.price) || 0,
-      totalPrice: parseFloat(item.totalPrice) || 0
+      totalPrice: parseFloat(item.totalPrice) || 0,
+      quantity: parseInt(item.quantity) || 1
     }));
     setCartItems(parsedItems);
   }, []);
@@ -82,35 +81,8 @@ const Cart = () => {
 
     setProcessing(true);
     try {
-      for (const item of cartItems) {
-        if (item.price === 0) {
-          const eventRef = ref(rtdb, `events/${item.id}`);
-          const eventSnapshot = await get(eventRef);
-          const eventData = eventSnapshot.val();
-
-          if (!eventData) {
-            throw new Error(`Event ${item.id} not found`);
-          }
-
-          if (eventData.availableTickets < item.quantity) {
-            throw new Error(`Not enough tickets available for ${eventData.title}`);
-          }
-
-          const updates: { [key: string]: any } = {};
-          
-          // Update available tickets with exact quantity
-          updates[`events/${item.id}/availableTickets`] = eventData.availableTickets - item.quantity;
-          
-          // Update user's purchased tickets
-          const userTicketsRef = `users/${currentUser.uid}/purchasedTickets/${item.id}`;
-          const existingTicketsSnapshot = await get(ref(rtdb, userTicketsRef));
-          const existingTickets = existingTicketsSnapshot.val() || 0;
-          updates[userTicketsRef] = existingTickets + item.quantity;
-
-          await update(ref(rtdb), updates);
-        }
-      }
-
+      await processCheckout(cartItems, currentUser.uid);
+      
       localStorage.setItem('cart', '[]');
       setCartItems([]);
       
@@ -123,9 +95,10 @@ const Cart = () => {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process free tickets",
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : "Failed to process checkout",
       });
+      console.error("Checkout error:", error);
     } finally {
       setProcessing(false);
     }
@@ -140,7 +113,7 @@ const Cart = () => {
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
       
-      <main className="container mx-auto px-4 pt-12 lg:pt-32 pb-16">
+      <main className="container mx-auto px-4 pt-32 pb-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
           

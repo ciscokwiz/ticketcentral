@@ -1,4 +1,4 @@
-import { ref, get, child, push } from 'firebase/database';
+import { ref, get, child, push, update } from 'firebase/database';
 import { rtdb } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 
@@ -43,6 +43,27 @@ export const createEvent = async (eventData: Omit<EventData, 'id'>) => {
       variant: "destructive",
       title: "Error",
       description: "Failed to create event. Please try again.",
+    });
+    throw error;
+  }
+};
+
+export const updateEvent = async (eventId: string, eventData: Omit<EventData, 'id'>) => {
+  try {
+    const eventRef = ref(rtdb, `events/${eventId}`);
+    await update(eventRef, eventData);
+    
+    toast({
+      title: "Success!",
+      description: "Event updated successfully",
+    });
+    
+    return eventId;
+  } catch (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to update event. Please try again.",
     });
     throw error;
   }

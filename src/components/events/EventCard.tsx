@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { EventData } from "@/services/eventService";
@@ -19,6 +19,14 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
 
   // Ensure ticketTiers exists and is an array
   const ticketTiers = Array.isArray(event.ticketTiers) ? event.ticketTiers : [];
+  const hasSingleTier = ticketTiers.length === 1;
+  
+  // If there's only one tier, automatically select it
+  useEffect(() => {
+    if (hasSingleTier) {
+      setSelectedTier(ticketTiers[0]);
+    }
+  }, [hasSingleTier, ticketTiers]);
 
   // Get available tickets for selected tier
   const availableTickets = selectedTier ? selectedTier.availableTickets : 0;
@@ -39,7 +47,7 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
   };
 
   const handleTierChange = (value: string) => {
-    if (!value) return; // Guard against empty string values
+    if (!value) return;
     const tier = ticketTiers.find(t => t.name === value);
     if (tier) {
       setSelectedTier(tier);
@@ -91,23 +99,28 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
         
         {ticketTiers.length > 0 ? (
           <div className="space-y-4">
-            <Select onValueChange={handleTierChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select ticket tier" />
-              </SelectTrigger>
-              <SelectContent>
-                {ticketTiers.map((tier) => (
-                  <SelectItem key={tier.name} value={tier.name || `tier-${Math.random()}`}>
-                    {tier.name} - ${tier.price} ({tier.availableTickets} left)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {!hasSingleTier && (
+              <Select onValueChange={handleTierChange}>
+                <SelectTrigger className="w-full bg-white">
+                  <SelectValue placeholder="Select ticket tier" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  {ticketTiers.map((tier) => (
+                    <SelectItem key={tier.name} value={tier.name || `tier-${Math.random()}`}>
+                      {tier.name} - ${tier.price} ({tier.availableTickets} left)
+                      {tier.price === 0 && " (Free)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
             {selectedTier && (
               <>
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold">${selectedTier.price}</span>
+                  <span className="font-semibold">
+                    {selectedTier.price === 0 ? "Free" : `$${selectedTier.price}`}
+                  </span>
                   <span className="text-sm text-neutral-600">
                     {selectedTier.availableTickets} tickets left
                   </span>
@@ -135,7 +148,7 @@ const EventCard = ({ event, onAddToCart }: EventCardProps) => {
                     onClick={handleAddToCart}
                     disabled={selectedTier.availableTickets === 0}
                   >
-                    Add to Cart
+                    {selectedTier.price === 0 ? "Get Free Tickets" : "Add to Cart"}
                   </Button>
                 </div>
               </>

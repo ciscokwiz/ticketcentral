@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ref, get, update, child } from 'firebase/database';
+import { ref, get, remove } from 'firebase/database';
 import { rtdb } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,7 @@ const ManageEvents = () => {
   const deleteEventMutation = useMutation({
     mutationFn: async (eventId: string) => {
       const eventRef = ref(rtdb, `events/${eventId}`);
-      await update(eventRef, null);
+      await remove(eventRef);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-events'] });
@@ -49,6 +49,14 @@ const ManageEvents = () => {
         title: "Event deleted",
         description: "The event has been successfully deleted.",
       });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete event. Please try again.",
+      });
+      console.error("Delete error:", error);
     }
   });
 
